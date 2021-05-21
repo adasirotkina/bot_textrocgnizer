@@ -11,7 +11,7 @@ class Photo:
     def __init__(self, image):
         self.image = image
 
-    def text(self, lang, size = 1.5):
+    def text(self, lang, size = 2):
         gray_image = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
 
         # creating Binary image by selecting proper threshold
@@ -40,6 +40,9 @@ class Photo:
 
 bot = telebot.TeleBot('1810169094:AAFPeAWc_-O-AtnMJLbdWXO9-07bqxpPAzM')
 
+bot.remove_webhook()
+
+
 @bot.message_handler(commands=['start'])
 def get_text_messages(message):
     bot.send_message(message.from_user.id, 'Данный бот предназначен для обработки текста с фотографий.'
@@ -51,7 +54,7 @@ def error(message):
 
 @bot.message_handler(content_types=['document'])
 def doc(message):
-    bot.send_message(message.from_user.id, 'Это что-то очень похожее на фото, но не оно. Если вы отправляли фото, попробуйте отпраить еще раз'
+    bot.send_message(message.from_user.id, 'Это что-то очень похожее на фото, но не оно. Если вы отправляли фото, попробуйте отправить еще раз \t'
                                            'и проверьте, что стоит галочка напротив "Compress image"')
 
 
@@ -85,17 +88,41 @@ def get_photo(message):
 def callback_worker(call):
     global image
     try:
-        if call.data == "rus": #call.data это callback_data, которую мы указали при объявлении кнопки
+        if call.data == "rus":
             bot.send_message(call.message.chat.id, image.text('rus'))
         if call.data == "eng": #call.data это callback_data, которую мы указали при объявлении кнопки
             bot.send_message(call.message.chat.id, image.text('eng'))
         if call.data == "rus+eng": #call.data это callback_data, которую мы указали при объявлении кнопки
             bot.send_message(call.message.chat.id, image.text('rus+eng'))
     except:
-        bot.send_message(call.message.chat.id, 'Сначала добавьте новую фотографию')
+        try:
+            if call.data == "rus":
+                bot.send_message(call.message.chat.id, image.text('rus', size = 1.5))
+            if call.data == "eng":  # call.data это callback_data, которую мы указали при объявлении кнопки
+                bot.send_message(call.message.chat.id, image.text('eng', size = 1.5))
+            if call.data == "rus+eng":  # call.data это callback_data, которую мы указали при объявлении кнопки
+                bot.send_message(call.message.chat.id, image.text('rus+eng', size = 1.5))
+        except:
+            try:
+                if call.data == "rus":
+                    bot.send_message(call.message.chat.id, image.text('rus', size=1))
+                if call.data == "eng":  # call.data это callback_data, которую мы указали при объявлении кнопки
+                    bot.send_message(call.message.chat.id, image.text('eng', size=1))
+                if call.data == "rus+eng":  # call.data это callback_data, которую мы указали при объявлении кнопки
+                    bot.send_message(call.message.chat.id, image.text('rus+eng', size=1))
+            except:
+                try:
+                    if call.data == "rus":
+                        bot.send_message(call.message.chat.id, image.text('rus', size=0.5))
+                    if call.data == "eng":  # call.data это callback_data, которую мы указали при объявлении кнопки
+                        bot.send_message(call.message.chat.id, image.text('eng', size=0.5))
+                    if call.data == "rus+eng":  # call.data это callback_data, которую мы указали при объявлении кнопки
+                        bot.send_message(call.message.chat.id, image.text('rus+eng', size=0.5))
+                except:
+                    bot.send_message(call.message.chat.id, 'Не могу найти текст :(')
 
 
 
 
 
-bot.polling()
+bot.polling(none_stop=True)
